@@ -2,19 +2,23 @@
 
 namespace App\Controller;
 
+use App\Repository\ArticleRepository;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ArticleController extends AbstractController
 {
     /**
-     * @Route("/article", name="article")
+     * @Route("/articles", name="article")
+     * @param ArticleRepository $articleRepository
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
-    public function index()
+    public function index(ArticleRepository $articleRepository)
     {
+        $articles = $articleRepository->findAll();
         return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/ArticleController.php',
+            'articles' => $articles
         ]);
     }
 }
