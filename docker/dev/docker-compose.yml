@@ -1,0 +1,59 @@
+version: '2'
+services:
+    fpm:
+        image: hw2-fpm
+        container_name: hw2_fpm
+        build:
+            context: ../..
+            dockerfile: ./docker/dev/fpm/Dockerfile
+        restart: 'no'
+        env_file: ./env.conf
+        volumes:
+            - ../../:/code
+        entrypoint: /code/docker/dev/fpm/entrypoint.sh
+        networks:
+            - default
+    nginx:
+        image: nginx:latest
+        container_name: hw2_nginx
+        ports:
+            - 80:80
+        depends_on:
+            - fpm
+        volumes_from:
+            - fpm:ro
+        volumes:
+            - ../dev/nginx/nginx.conf:/etc/nginx/nginx.conf
+        restart: 'no'
+        networks:
+            default:
+            proxy:
+                aliases:
+                    - hw2.localhost
+        labels:
+            - "traefik.enable=true"
+            - "traefik.port=80"
+            - "traefik.frontend.rule=Host:hw2.localhost"
+            - "traefik.frontend.passHostHeader=true"
+            - "traefik.docker.network=traefik_webgateway"
+    db:
+        container_name: hw2_db
+        image: mariadb
+        environment:
+            - MYSQL_DATABASE=hw2
+            - MYSQL_ROOT_PASSWORD=mypass
+        volumes:
+            - ./mysql/:/var/lib/mysql/
+        restart: 'no'
+        networks:
+            - default
+
+networks:
+    webgateway:
+        driver: bridge
+
+    default:
+        driver: bridge
+    proxy:
+        external:
+            name: traefik_webgateway
