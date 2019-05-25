@@ -14,7 +14,7 @@ services:
         networks:
             - default
     nginx:
-        image: nginx:latest
+        image: boky/nginx:latest
         container_name: hw2_nginx
         ports:
             - 80:80
@@ -27,6 +27,8 @@ services:
         restart: 'no'
         networks:
             default:
+                aliases:
+                    - hw2.localhost
             proxy:
                 aliases:
                     - hw2.localhost
@@ -56,11 +58,13 @@ services:
             - "8086:8086"
             - "8090:8090"
         env_file:
-            - 'env.influxdb'
+            - './env.influxdb'
         volumes:
             # Data persistency
             # sudo mkdir -p /srv/docker/influxdb/data
             - ../dev/influxdb/data:/var/lib/influxdb
+        networks:
+            - default
 
     telegraf:
         image: telegraf:latest
@@ -68,7 +72,10 @@ services:
         links:
             - influxdb
         volumes:
-            - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+            - ../dev/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+            - /var/run/docker.sock:/var/run/docker.sock
+        networks:
+            - default
 
     grafana:
         image: grafana/grafana:latest
@@ -76,16 +83,15 @@ services:
         ports:
             - "3000:3000"
         env_file:
-            - 'env.grafana'
+            - './env.grafana'
         links:
             - influxdb
         volumes:
             # Data persistency
             # sudo mkdir -p /srv/docker/grafana/data; chown 472:472 /srv/docker/grafana/data
             - ../dev/grafana/data:/var/lib/grafana
-
-
-
+        networks:
+            - default
 
 networks:
     webgateway:

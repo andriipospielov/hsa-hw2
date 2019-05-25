@@ -1,5 +1,8 @@
 /vendor/
 /docker/dev/mysql/
+/docker/dev/grafana/data/
+/docker/dev/influxdb/data/
+/docker/dev/mysql/
 /.idea/
 
 ###> symfony/framework-bundle ###
